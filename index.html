@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b57d0">
+<title>MerchantPay</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f7fb;font-family:Arial,sans-serif;color:#172033}
+.app{max-width:480px;margin:auto;min-height:100vh;background:#fff}
+header{background:#0b57d0;color:#fff;padding:18px 18px 24px;border-radius:0 0 22px 22px}
+.top{display:flex;align-items:center;justify-content:space-between}.brand{font-size:20px;font-weight:800}
+.icon{border:0;background:#ffffff22;color:#fff;border-radius:12px;padding:9px 11px;font-size:18px}
+.shop{margin-top:20px}.shop small{opacity:.8}.shop h2{margin:5px 0;font-size:24px}
+.balance{margin-top:16px;background:#ffffff18;padding:14px;border-radius:16px}.balance span{font-size:12px;opacity:.8}.balance b{display:block;font-size:28px;margin-top:4px}
+main{padding:18px 16px 92px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.card{border:1px solid #e6eaf0;border-radius:16px;padding:16px;background:#fff;box-shadow:0 3px 14px #1720330a}
+.action{font-weight:700}.action .ico{font-size:24px;display:block;margin-bottom:10px}
+.section{display:flex;justify-content:space-between;align-items:center;margin:24px 2px 10px}.section h3{margin:0;font-size:17px}
+.tx{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #edf0f4}.avatar{width:42px;height:42px;border-radius:50%;background:#e9f0ff;display:grid;place-items:center;font-weight:700;color:#0b57d0}
+.tx div:nth-child(2){flex:1}.tx b{display:block}.tx small{color:#748096}.amt{font-weight:800}.green{color:#138a43}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);background:#fff;border-top:1px solid #e6eaf0;display:flex;justify-content:space-around;padding:9px 4px calc(9px + env(safe-area-inset-bottom));z-index:5}
+nav button{border:0;background:none;color:#778198;font-size:11px}nav .active{color:#0b57d0;font-weight:700}nav span{display:block;font-size:20px;margin-bottom:3px}
+.page{display:none}.page.active{display:block}.back{border:0;background:none;font-size:22px}
+input{width:100%;padding:13px;border:1px solid #dce2eb;border-radius:12px;margin:7px 0 14px;font-size:15px}
+.btn{width:100%;padding:14px;border:0;border-radius:12px;background:#0b57d0;color:white;font-weight:700;font-size:15px}
+.qr{width:230px;height:230px;margin:18px auto;border:10px solid #111;border-radius:8px;display:grid;place-items:center;background:repeating-linear-gradient(45deg,#111 0 4px,#fff 4px 8px)}
+.note{background:#fff8df;border:1px solid #f0df9b;padding:12px;border-radius:12px;font-size:13px;color:#6d5a14}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+ <div class="top"><div class="brand" id="brand">MerchantPay</div><button class="icon" onclick="show('settings')">⚙</button></div>
+ <div class="shop"><small>Business account</small><h2 id="shopName">My Shop</h2></div>
+ <div class="balance"><span>Today's collection</span><b id="today">₹12,450</b></div>
+</header>
+
+<main>
+<section id="home" class="page active">
+ <div class="grid">
+  <div class="card action" onclick="show('qr')"><span class="ico">▣</span>Collect Payment</div>
+  <div class="card action" onclick="show('payments')"><span class="ico">₹</span>Payments</div>
+  <div class="card action" onclick="show('settlements')"><span class="ico">↗</span>Settlements</div>
+  <div class="card action" onclick="show('reports')"><span class="ico">▤</span>Reports</div>
+ </div>
+ <div class="section"><h3>Recent payments</h3><button class="back" onclick="show('payments')">›</button></div>
+ <div id="recent"></div>
+</section>
+
+<section id="payments" class="page">
+ <div class="section"><h3>Payments</h3></div>
+ <input placeholder="Search customer or amount" oninput="filterTx(this.value)">
+ <div id="alltx"></div>
+</section>
+
+<section id="qr" class="page">
+ <div class="section"><button class="back" onclick="show('home')">‹</button><h3>Collect Payment</h3><span></span></div>
+ <div class="card" style="text-align:center"><h3 id="qrshop">My Shop</h3><div class="qr">QR</div><b id="upi">UPI ID not set</b><p style="color:#748096">Demo QR preview — connect an authorised payment provider for live collections.</p></div>
+</section>
+
+<section id="settlements" class="page">
+ <div class="section"><h3>Settlements</h3></div>
+ <div class="card"><small>Available balance</small><h2>₹8,250</h2><button class="btn" onclick="alert('Live settlement requires an authorised PSP/payment partner.')">View settlement</button></div>
+</section>
+
+<section id="reports" class="page">
+ <div class="section"><h3>Reports</h3></div>
+ <div class="grid"><div class="card"><small>Total sales</small><h2>₹1,84,250</h2></div><div class="card"><small>Transactions</small><h2>248</h2></div></div>
+</section>
+
+<section id="settings" class="page">
+ <div class="section"><button class="back" onclick="show('home')">‹</button><h3>Merchant Settings</h3><span></span></div>
+ <div class="card">
+  <label>Brand name</label><input id="brandInput" placeholder="Your brand name">
+  <label>Shop name</label><input id="shopInput" placeholder="Shop name">
+  <label>UPI ID</label><input id="upiInput" placeholder="merchant@upi">
+  <button class="btn" onclick="saveSettings()">Save settings</button>
+ </div>
+ <br><div class="note">Payment records are not deleted when dashboard visibility is changed. Live payments, refunds and settlements need a compliant backend and authorised payment provider.</div>
+</section>
+</main>
+
+<nav>
+<button class="active" onclick="show('home',this)"><span>⌂</span>Home</button>
+<button onclick="show('payments',this)"><span>₹</span>Payments</button>
+<button onclick="show('qr',this)"><span>▣</span>QR</button>
+<button onclick="show('settings',this)"><span>⚙</span>Settings</button>
+</nav>
+</div>
+
+<script>
+const tx=[
+ {n:"Customer A",a:"₹2,500",t:"Today, 12:42 PM"},
+ {n:"Customer B",a:"₹850",t:"Today, 11:18 AM"},
+ {n:"Customer C",a:"₹1,200",t:"Yesterday, 7:30 PM"},
+ {n:"Customer D",a:"₹4,000",t:"Yesterday, 3:05 PM"}
+];
+let cfg=JSON.parse(localStorage.getItem("merchantCfg")||"{}");
+function apply(){
+ document.getElementById("brand").textContent=cfg.brand||"MerchantPay";
+ document.getElementById("shopName").textContent=cfg.shop||"My Shop";
+ document.getElementById("qrshop").textContent=cfg.shop||"My Shop";
+ document.getElementById("upi").textContent=cfg.upi||"UPI ID not set";
+ document.getElementById("brandInput").value=cfg.brand||"";
+ document.getElementById("shopInput").value=cfg.shop||"";
+ document.getElementById("upiInput").value=cfg.upi||"";
+}
+function rows(list){
+ return list.map(x=>`<div class="tx"><div class="avatar">${x.n[0]}</div><div><b>${x.n}</b><small>${x.t}</small></div><div class="amt green">+${x.a}</div></div>`).join("");
+}
+function render(){document.getElementById("recent").innerHTML=rows(tx.slice(0,3));document.getElementById("alltx").innerHTML=rows(tx);}
+function filterTx(q){q=q.toLowerCase();document.getElementById("alltx").innerHTML=rows(tx.filter(x=>(x.n+x.a+x.t).toLowerCase().includes(q)));}
+function show(id,el){
+ document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active");
+ if(el){document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));el.classList.add("active");}
+ window.scrollTo(0,0);
+}
+function saveSettings(){
+ cfg={brand:document.getElementById("brandInput").value.trim()||"MerchantPay",shop:document.getElementById("shopInput").value.trim()||"My Shop",upi:document.getElementById("upiInput").value.trim()};
+ localStorage.setItem("merchantCfg",JSON.stringify(cfg));apply();alert("Settings saved");show("home");
+}
+apply();render();
+</script>
+</body></html>
